@@ -3,10 +3,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 
+// Middleware
 app.use(bodyParser.json());
 
+// Webhook route
 app.post('/webhook', (req, res) => {
-  const intent = req.body.queryResult.intent.displayName;
+  const intent = req.body.queryResult?.intent?.displayName || '';
 
   let responseText = '';
   switch (intent) {
@@ -25,7 +27,8 @@ app.post('/webhook', (req, res) => {
   });
 });
 
+// Start the server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`Ermis webhook server running on port ${PORT}`);
+  console.log(`✅ Ermis webhook server running on port ${PORT}`);
 });
