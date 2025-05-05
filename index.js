@@ -28,7 +28,7 @@ app.post('/webhook', (req, res) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Ermis webhook server running on port ${PORT}`);
 });
