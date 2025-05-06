@@ -3,14 +3,28 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 
-// Middleware
 app.use(bodyParser.json());
 
-// Webhook route
-app.post('/webhook', (req, res) => {
-  console.log("📥 Received request:", req.body);
+// Facebook Webhook Verification Handler
+app.get('/webhook', (req, res) => {
+  const VERIFY_TOKEN = "courierbot"; // <-- Make sure this matches what you set in FB App
 
-  const intent = req.body.queryResult?.intent?.displayName || '';
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  if (mode && token && mode === 'subscribe' && token === VERIFY_TOKEN) {
+    console.log('🔗 Webhook verified by Facebook');
+    res.status(200).send(challenge);
+  } else {
+    res.sendStatus(403);
+  }
+});
+
+// Dialogflow fulfillment endpoint
+app.post('/webhook', (req, res) => {
+  console.log("📥 Received request:", JSON.stringify(req.body, null, 2));
+  const intent = req.body.queryResult.intent.displayName;
 
   let responseText = '';
   switch (intent) {
@@ -25,11 +39,12 @@ app.post('/webhook', (req, res) => {
   }
 
   console.log("📤 Responding with:", responseText);
-  res.json({ fulfillmentText: responseText });
+  return res.json({
+    fulfillmentText: responseText
+  });
 });
 
-// Use Render's dynamic port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Ermis webhook server running on port ${PORT}`);
+  console.log(`🚀 Ermis webhook server running on port ${PORT}`);
 });
